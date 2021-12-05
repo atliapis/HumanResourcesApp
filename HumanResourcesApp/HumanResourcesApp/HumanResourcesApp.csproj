@@ -178,6 +178,11 @@
     <Compile Include="Controllers\EmployeesController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="DataAccess\DatabaseAccessManager.cs" />
+    <Compile Include="DataAccess\Services\DepartmentsService.cs" />
+    <Compile Include="DataAccess\Services\IDepartmentsService.cs" />
+    <Compile Include="DataAccess\Services\IStatusesService.cs" />
+    <Compile Include="DataAccess\Services\StatusesService.cs" />
     <Compile Include="Department.cs">
       <DependentUpon>HumanResourcesModel.tt</DependentUpon>
     </Compile>
@@ -206,6 +211,8 @@
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="DataAccess\Services\EmployeesService.cs" />
+    <Compile Include="DataAccess\Services\IEmployeesService.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="Status.cs">
       <DependentUpon>HumanResourcesModel.tt</DependentUpon>
