@@ -5,7 +5,7 @@ namespace HumanResourcesApp.DataAccess.Services
 {
     public class DepartmentsService: IDepartmentsService
     {
-        private DatabaseAccessManager _dbManager;
+        private readonly DatabaseAccessManager _dbManager;
 
         public DepartmentsService(HumanResourcesContext dbcontext)
         {

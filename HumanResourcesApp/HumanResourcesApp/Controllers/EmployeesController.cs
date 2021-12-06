@@ -1,25 +1,129 @@
-﻿using System;
+﻿using HumanResourcesApp.DataAccess.Services;
+using HumanResourcesApp.Services;
+using HumanResourcesApp.Views.Shared;
+using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Entity;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Net;
-using System.Web;
+using System.Threading.Tasks;
 using System.Web.Mvc;
-using HumanResourcesApp;
 
 namespace HumanResourcesApp.Controllers
 {
+    public class IndexModel
+    {
+        public PaginatedList<Employee> Employees { get; set; }
+
+        public int? DepartmentIdFilter { get; set; }
+
+        public int? StatusIdFilter { get; set; }
+
+        public int? PageIndex { get; set; }
+
+        public List<SelectListItem> DepartmentsList { get; set; }
+
+        public List<SelectListItem> StatusesList { get; set; }
+
+        public IndexModel()
+        {
+        }
+    }
+
     public class EmployeesController : Controller
     {
-        private HumanResourcesContext db = new HumanResourcesContext();
+        private readonly HumanResourcesContext db;
+        private readonly EmployeesService _employeesService;
+        private readonly DepartmentsService _departmentsService;
+        private readonly StatusesService _statusesService;
+
+        public EmployeesController()
+        {
+            db = new HumanResourcesContext();
+            _employeesService = new EmployeesService(db);
+            _departmentsService = new DepartmentsService(db);
+            _statusesService = new StatusesService(db);
+        }
 
         // GET: Employees
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(string departmentIdFilter, string statusIdFilter, int? pageIndex)
         {
-            var employees = db.Employees.Include(e => e.Department1).Include(e => e.Status1);
-            return View(await employees.ToListAsync());
+            if(pageIndex == null)
+            {
+                pageIndex = 1;
+            }
+
+            int departmentIdInt = 0;
+            if (departmentIdFilter != null) departmentIdInt = Int32.Parse(departmentIdFilter);
+
+            int statusIdInt = 0;
+            if (statusIdFilter != null) statusIdInt = Int32.Parse(statusIdFilter);
+
+            var employees = await _employeesService.GetEmployeesAsync(departmentIdInt, statusIdInt);
+
+            var results = new IndexModel()
+            {
+                Employees = await PaginatedList<Employee>.CreateAsync(employees, pageIndex ?? 1, 10),
+                DepartmentIdFilter = departmentIdInt,
+                StatusIdFilter = statusIdInt,
+                PageIndex = pageIndex,
+                DepartmentsList = await PopulateDepartmentsList(),
+                StatusesList = await PopulateStatusesList()
+            };
+
+            ViewBag.departmentIdFilter = results.DepartmentsList;
+            ViewBag.statusIdFilter = results.StatusesList;
+
+            return View(results);
+        }
+
+        private async Task<List<SelectListItem>> PopulateDepartmentsList()
+        {
+            var departmentsListItems = new List<SelectListItem>();
+
+            var deps = await _departmentsService.GetAllDepartmentsAsync();
+
+            departmentsListItems.Add(new SelectListItem()
+            {
+                Text = "All Departments",
+                Value = "0",
+                Selected = true
+            });
+
+            foreach (var dep in deps)
+            {
+                departmentsListItems.Add(new SelectListItem()
+                {
+                    Text = dep.Name,
+                    Value = dep.Id.ToString()
+                });
+            }
+
+            return departmentsListItems;
+        }
+
+        private async Task<List<SelectListItem>> PopulateStatusesList()
+        {
+            var statusesListItems = new List<SelectListItem>();
+
+            var statuses = await _statusesService.GetAllStatusesAsync();
+
+            statusesListItems.Add(new SelectListItem()
+            {
+                Text = "All Statuses",
+                Value = "0",
+                Selected = true
+            });
+
+            foreach (var status in statuses)
+            {
+                statusesListItems.Add(new SelectListItem()
+                {
+                    Text = status.Name,
+                    Value= status.Id.ToString()
+                });
+            }
+
+            return statusesListItems;
         }
 
         // GET: Employees/Details/5

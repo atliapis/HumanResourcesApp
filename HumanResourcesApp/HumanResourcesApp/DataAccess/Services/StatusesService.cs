@@ -5,7 +5,7 @@ namespace HumanResourcesApp.DataAccess.Services
 {
     public class StatusesService: IStatusesService
     {
-        private DatabaseAccessManager _dbManager;
+        private readonly DatabaseAccessManager _dbManager;
 
         public StatusesService(HumanResourcesContext dbContext)
         {

@@ -217,6 +217,7 @@
     <Compile Include="Status.cs">
       <DependentUpon>HumanResourcesModel.tt</DependentUpon>
     </Compile>
+    <Compile Include="Views\Shared\PaginatedList.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-theme.css" />

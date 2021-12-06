@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
 using System.Data.Entity;
+using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace HumanResourcesApp.DataAccess
@@ -64,6 +68,60 @@ namespace HumanResourcesApp.DataAccess
             }
 
             return false;
+        }
+
+        public async Task<IQueryable<Employee>> GetEmployeesAsync(int departmentId, int statusId)
+        {
+            var employees = new List<Employee>();
+            try
+            {
+                using (var conn = new SqlConnection(_dbContext.Database.Connection.ConnectionString))
+                {
+                    using (var command = new SqlCommand("GetFilteredEmployees", conn))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue("@DepartmentId", departmentId);
+                        command.Parameters.AddWithValue("@StatusId", statusId);
+
+                        conn.Open();
+                        SqlDataReader reader = await command.ExecuteReaderAsync();
+
+                        while (reader.Read())
+                        {
+                            var department = new Department
+                            {
+                                Id = (int)reader["DepartmentId"],
+                                Name = (string)reader["DepartmentName"]
+                            };
+
+                            var status = new Status
+                            {
+                                Id = (int)reader["StatusId"],
+                                Name = (string)reader["StatusName"]
+                            };
+
+                            employees.Add(new Employee
+                            {
+                                EmployeeNumber = (int)reader["EmployeeNumber"],
+                                FirstName = (string)reader["FirstName"],
+                                LastName = (string)reader["LastName"],
+                                DateOfBirth = (DateTime)reader["DateOfBirth"],
+                                Email = (string)reader["Email"],
+                                Department = department.Id,
+                                Status = status.Id,
+                                Department1 = department,
+                                Status1 = status
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                var a = 1;
+            }
+
+            return employees.AsQueryable(); ;
         }
     }
 }
