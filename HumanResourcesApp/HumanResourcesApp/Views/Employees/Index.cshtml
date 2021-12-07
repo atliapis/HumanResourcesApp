@@ -23,19 +23,20 @@
 <table class="table">
     <tr>
         <th>
-            First Name
+            First Name         
         </th>
         <th>
-            Last Name
+            @*TODO create ViewImports with TagHelpers*@
+            <a href="/Employees?sortOrder=@Model.LastNameSort&departmentIdFilter=@Model.DepartmentIdFilter&statusIdFilter=@Model.StatusIdFilter&pageIndex=@Model.PageIndex">Last Name</a>
         </th>
         <th>
             Date Of Birth
         </th>
         <th>
-            Department
+            <a href="/Employees?sortOrder=@Model.DepartmentSort&departmentIdFilter=@Model.DepartmentIdFilter&statusIdFilter=@Model.StatusIdFilter&pageIndex=@Model.PageIndex">Department</a>
         </th>
         <th>
-            Status
+            <a href="/Employees?sortOrder=@Model.StatusSort&departmentIdFilter=@Model.DepartmentIdFilter&statusIdFilter=@Model.StatusIdFilter&pageIndex=@Model.PageIndex">Status</a>
         </th>
         <th></th>
     </tr>
@@ -75,25 +76,13 @@
 
 <ul class="pagination">
     <li class="page-item @prevDisabled">
-        <a asp-page="./Index"
-           asp-route-pageIndex="@(Model.Employees.PageIndex - 1)"
-           asp-route-departmentIdFilter="@Model.DepartmentIdFilter"
-           asp-route-statusIdFilter="@Model.StatusIdFilter"
-           class="page-link">
-            <
-        </a>
+        <a href="/Employees?sortOrder=@Model.CurrentSort&departmentIdFilter=@Model.DepartmentIdFilter&statusIdFilter=@Model.StatusIdFilter&pageIndex=@(Model.Employees.PageIndex - 1)"><</a>
     </li>
 
     <li class="page-item pages m-auto">
         <a>@Model.Employees.PageIndex of @Model.Employees.TotalPages</a>
     </li>
     <li class="page-item @nextDisabled">
-        <a asp-page="./Index"
-           asp-route-pageIndex="@(Model.Employees.PageIndex + 1)"
-           asp-route-departmentIdFilter="@Model.DepartmentIdFilter"
-           asp-route-statusIdFilter="@Model.StatusIdFilter"
-           class="page-link">
-            >
-        </a>
+        <a href="/Employees?sortOrder=@Model.CurrentSort&departmentIdFilter=@Model.DepartmentIdFilter&statusIdFilter=@Model.StatusIdFilter&pageIndex=@(Model.Employees.PageIndex + 1)">></a>
     </li>
 </ul>

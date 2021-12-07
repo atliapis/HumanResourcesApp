@@ -7,6 +7,7 @@ using System.Data.Entity;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using System.Linq;
 
 namespace HumanResourcesApp.Controllers
 {
@@ -24,6 +25,11 @@ namespace HumanResourcesApp.Controllers
 
         public List<SelectListItem> StatusesList { get; set; }
 
+        public string LastNameSort { get; set; }
+        public string DepartmentSort { get; set; }
+        public string StatusSort { get; set; }
+        public string CurrentSort { get; set; }
+
         public IndexModel()
         {
         }
@@ -35,6 +41,7 @@ namespace HumanResourcesApp.Controllers
         private readonly EmployeesService _employeesService;
         private readonly DepartmentsService _departmentsService;
         private readonly StatusesService _statusesService;
+        private readonly SettingsService _settingsService;
 
         public EmployeesController()
         {
@@ -42,11 +49,14 @@ namespace HumanResourcesApp.Controllers
             _employeesService = new EmployeesService(db);
             _departmentsService = new DepartmentsService(db);
             _statusesService = new StatusesService(db);
+            _settingsService = new SettingsService(db);
         }
 
         // GET: Employees
-        public async Task<ActionResult> Index(string departmentIdFilter, string statusIdFilter, int? pageIndex)
+        public async Task<ActionResult> Index(string sortOrder, string departmentIdFilter, string statusIdFilter, int? pageIndex)
         {
+            
+
             if(pageIndex == null)
             {
                 pageIndex = 1;
@@ -60,15 +70,47 @@ namespace HumanResourcesApp.Controllers
 
             var employees = await _employeesService.GetEmployeesAsync(departmentIdInt, statusIdInt);
 
+            //sorting
             var results = new IndexModel()
             {
-                Employees = await PaginatedList<Employee>.CreateAsync(employees, pageIndex ?? 1, 10),
-                DepartmentIdFilter = departmentIdInt,
-                StatusIdFilter = statusIdInt,
-                PageIndex = pageIndex,
-                DepartmentsList = await PopulateDepartmentsList(),
-                StatusesList = await PopulateStatusesList()
+                CurrentSort = sortOrder,
+                LastNameSort = sortOrder == "last_name_asc" ? "last_name_desc" : "last_name_asc",
+                DepartmentSort = sortOrder == "department_asc" ? "department_desc" : "department_asc",
+                StatusSort = sortOrder == "status_asc" ? "status_desc" : "status_asc"
             };
+
+            // Sorting
+            switch (sortOrder)
+            {
+                case "last_name_desc":
+                    employees = employees.OrderByDescending(e => e.LastName);
+                    break;
+                case "last_name_asc":
+                    employees = employees.OrderBy(e => e.LastName);
+                    break;
+                case "department_desc":
+                    employees = employees.OrderByDescending(e => e.Department1.Name);
+                    break;
+                case "department_asc":
+                    employees = employees.OrderBy(e => e.Department1.Name);
+                    break;
+                case "status_desc":
+                    employees = employees.OrderByDescending(e => e.Status1.Name);
+                    break;
+                case "status_asc":
+                    employees = employees.OrderBy(e => e.Status1.Name);
+                    break;
+                default:
+                    employees = employees.OrderBy(e => e.LastName);
+                    break;
+            }
+
+            results.Employees = await PaginatedList<Employee>.CreateAsync(employees, pageIndex ?? 1, await _settingsService.GetResultsPerPageSetting());
+            results.DepartmentIdFilter = departmentIdInt;
+            results.StatusIdFilter = statusIdInt;
+            results.PageIndex = pageIndex;
+            results.DepartmentsList = await PopulateDepartmentsList();
+            results.StatusesList = await PopulateStatusesList();
 
             ViewBag.departmentIdFilter = results.DepartmentsList;
             ViewBag.statusIdFilter = results.StatusesList;
