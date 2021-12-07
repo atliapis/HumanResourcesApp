@@ -123,5 +123,33 @@ namespace HumanResourcesApp.DataAccess
 
             return employees.AsQueryable(); ;
         }
+
+        public async Task AddSetting(string name, int value)
+        {
+            if (await _dbContext.Settings.FindAsync(name) != null)
+                return;
+
+            _dbContext.Settings.Add(new Setting() { Name = name, Value = value });
+            await _dbContext.SaveChangesAsync();
+        }
+
+        private async Task<int> GetSetting(string name)
+        {
+            var setting = await _dbContext.Settings.FindAsync(name);
+            
+            if(setting!= null && setting.Value != 0)
+            {
+                return (int)setting.Value;
+            }
+            else
+            {
+                return 10;
+            }
+        }
+
+        public async Task<int> GetResultsPerPageSetting()
+        {
+            return await GetSetting("Total results per page");
+        }
     }
 }

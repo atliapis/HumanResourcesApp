@@ -12,6 +12,8 @@ namespace HumanResourcesApp
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
+    using System.Data.Entity.Core.Objects;
+    using System.Linq;
     
     public partial class HumanResourcesContext : DbContext
     {
@@ -28,5 +30,19 @@ namespace HumanResourcesApp
         public virtual DbSet<Department> Departments { get; set; }
         public virtual DbSet<Employee> Employees { get; set; }
         public virtual DbSet<Status> Statuses { get; set; }
+        public virtual DbSet<Setting> Settings { get; set; }
+    
+        public virtual ObjectResult<GetFilteredEmployees_Result> GetFilteredEmployees(Nullable<int> departmentId, Nullable<int> statusId)
+        {
+            var departmentIdParameter = departmentId.HasValue ?
+                new ObjectParameter("DepartmentId", departmentId) :
+                new ObjectParameter("DepartmentId", typeof(int));
+    
+            var statusIdParameter = statusId.HasValue ?
+                new ObjectParameter("StatusId", statusId) :
+                new ObjectParameter("StatusId", typeof(int));
+    
+            return ((IObjectContextAdapter)this).ObjectContext.ExecuteFunction<GetFilteredEmployees_Result>("GetFilteredEmployees", departmentIdParameter, statusIdParameter);
+        }
     }
 }

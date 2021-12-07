@@ -31,9 +31,23 @@ BEGIN TRY
                 Status int	FOREIGN KEY REFERENCES Statuses(Id)
             );
         END
+        
+        IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Settings' AND xtype='U')
+        BEGIN
+            CREATE TABLE Settings (
+                Name nvarchar(255) PRIMARY KEY,
+                Value int
+            );
+        END
 
         CREATE INDEX idx_filter
             ON Employees (Department, Status);
+
+        CREATE INDEX idx_statuses_filter
+            ON Statuses (Id);
+
+        CREATE INDEX idx_departments_filter
+            ON Departments (Id);
 
 END TRY
 BEGIN CATCH

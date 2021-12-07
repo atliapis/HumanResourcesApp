@@ -28,6 +28,8 @@ namespace HumanResourcesApp
             var dbContext = new HumanResourcesContext();
 
             //Seed default data
+            await new SettingsService(dbContext).AddSetting("Total results per page", 10);
+
             Status defaultStatus1 = new Status
             {
                 Id = 1,
