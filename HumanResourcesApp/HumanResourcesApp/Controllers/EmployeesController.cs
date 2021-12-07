@@ -8,6 +8,8 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Linq;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 namespace HumanResourcesApp.Controllers
 {
@@ -33,6 +35,67 @@ namespace HumanResourcesApp.Controllers
         public IndexModel()
         {
         }
+    }
+
+    public class EmployeeDto
+    {
+        public EmployeeDto()
+        {
+
+        }
+
+        public EmployeeDto(Employee employee)
+        {
+            EmployeeNumber = employee.EmployeeNumber;
+            FirstName = employee.FirstName;
+            LastName = employee.LastName;
+            DateOfBirth = employee.DateOfBirth;
+            Email = employee.Email;
+            Department = employee.Department;
+            Status = employee.Status;
+            Department1 = employee.Department1;
+            Status1 = employee.Status1;
+        }
+
+        [DisplayName("Employee Number")]
+        [Required]
+        public int EmployeeNumber { get; set; }
+
+        [DisplayName("First Name")]
+        [Required]
+        [RegularExpression(@"^[A-Z]+[a-zA-Z -]*$")]
+        [StringLength(255, MinimumLength = 2)]
+        public string FirstName { get; set; }
+
+        [DisplayName("Last Name")]
+        [Required]
+        [RegularExpression(@"^[A-Z]+[a-zA-Z -]*$")]
+        [StringLength(255, MinimumLength = 2)]
+        public string LastName { get; set; }
+
+        [DisplayName("Date Of Birth")]
+        [Required]
+        [DataType(DataType.Date)]
+        public Nullable<System.DateTime> DateOfBirth { get; set; }
+
+        [DisplayName("Email")]
+        [Required]
+        [DataType(DataType.EmailAddress)]
+        public string Email { get; set; }
+
+        [DisplayName("Department")]
+        [Required]
+        public Nullable<int> Department { get; set; }
+
+        [DisplayName("Status")]
+        [Required]
+        public Nullable<int> Status { get; set; }
+
+        [DisplayName("Department")]
+        public virtual Department Department1 { get; set; }
+
+        [DisplayName("Status")]
+        public virtual Status Status1 { get; set; }
     }
 
     public class EmployeesController : Controller
@@ -180,7 +243,7 @@ namespace HumanResourcesApp.Controllers
             {
                 return HttpNotFound();
             }
-            return View(employee);
+            return View(new EmployeeDto(employee));
         }
 
         // GET: Employees/Create
@@ -196,11 +259,21 @@ namespace HumanResourcesApp.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "EmployeeNumber,FirstName,LastName,DateOfBirth,Email,Department,Status")] Employee employee)
+        public async Task<ActionResult> Create([Bind(Include = "EmployeeNumber,FirstName,LastName,DateOfBirth,Email,Department,Status")] EmployeeDto employee)
         {
             if (ModelState.IsValid)
             {
-                db.Employees.Add(employee);
+                var dbEmployee = new Employee()
+                {
+                    EmployeeNumber = employee.EmployeeNumber,
+                    FirstName = employee.FirstName,
+                    LastName = employee.LastName,
+                    DateOfBirth = employee.DateOfBirth,
+                    Email = employee.Email,
+                    Department = employee.Department,
+                    Status = employee.Status
+                };
+                db.Employees.Add(dbEmployee);
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
@@ -224,7 +297,7 @@ namespace HumanResourcesApp.Controllers
             }
             ViewBag.Department = new SelectList(db.Departments, "Id", "Name", employee.Department);
             ViewBag.Status = new SelectList(db.Statuses, "Id", "Name", employee.Status);
-            return View(employee);
+            return View(new EmployeeDto(employee));
         }
 
         // POST: Employees/Edit/5
@@ -232,7 +305,7 @@ namespace HumanResourcesApp.Controllers
         // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "EmployeeNumber,FirstName,LastName,DateOfBirth,Email,Department,Status")] Employee employee)
+        public async Task<ActionResult> Edit([Bind(Include = "EmployeeNumber,FirstName,LastName,DateOfBirth,Email,Department,Status")] EmployeeDto employee)
         {
             if (ModelState.IsValid)
             {
