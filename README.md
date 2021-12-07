@@ -1,6 +1,7 @@
 # HumanResourcesApp
 
-###Instructions to install:
+  ### Instructions to install:
+  
   There are two alternative ways to install the database:
   **Create it:**
   1. Create a database executing HumanResourcesApp\DB\CreateDatabase.sql or manually
